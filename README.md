@@ -1,50 +1,158 @@
-# Welcome to your Expo app 👋
+# KananHack Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+An AI-powered document verification mobile app built with React Native (Expo). Students can upload, verify, and manage their academic and identity documents. The backend uses Google Gemini AI to extract and analyze document data.
 
-## Get started
+---
 
-1. Install dependencies
+## Tech Stack
 
-   ```bash
-   npm install
-   ```
+| Layer | Technology |
+|-------|-----------|
+| Framework | React Native 0.81.5 + Expo SDK 54 |
+| Language | TypeScript |
+| Routing | Expo Router v6 (file-based) |
+| Auth Storage | Expo SecureStore |
+| Icons | @expo/vector-icons (Ionicons) |
+| Backend | Node.js REST API |
+| AI | Google Gemini (server-side) |
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## Project Structure
 
-In the output, you'll find options to open the app in a
+```
+app/
+├── (auth)/
+│   ├── login.tsx           # Login screen
+│   └── register.tsx        # Register screen
+├── (tabs)/
+│   ├── _layout.tsx         # Tab bar + profile header
+│   ├── index.tsx           # Home / Dashboard
+│   ├── upload.tsx          # File upload + file list
+│   └── settings.tsx        # Settings (placeholder)
+├── file/
+│   ├── [id].tsx            # Document detail screen
+│   └── sop-analysis/
+│       └── [id].tsx        # Deep SOP analysis screen
+├── _layout.tsx             # Root layout + auth guard
+└── index.tsx               # Entry redirect
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+context/
+└── AuthContext.tsx         # JWT auth state + SecureStore
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+utils/
+└── api.ts                  # Fetch wrapper + token helpers
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+constants/
+└── theme.ts                # Light/dark color tokens
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Features
 
-To learn more about developing your project with Expo, look at the following resources:
+### Authentication
+- JWT-based login and registration
+- Persistent session via Expo SecureStore
+- Auto-redirect based on auth state (protected routes)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Home Screen
+- Personalized greeting with user's first name
+- Application progress bar with live completion percentage
+- Dashboard cards for each uploaded document showing:
+  - Document type, verification status, authenticity score
+  - AI-generated summary
+- Tappable cards navigate to document detail screen
+- **Submit Application** button appears when completion reaches 100%
+- Pull-to-refresh
 
-## Join the community
+### Upload Screen
+- File picker supporting PDF, JPEG, JPG, DOC, DOCX
+- Client-side format validation before upload
+- Multipart form upload with Bearer token auth
+- Live file list with pull-to-refresh
+- Each file card navigates to its detail screen
+- Unsupported file types show a lock icon
 
-Join our community of developers creating universal apps.
+### Document Detail Screen
+Automatically detects document type and calls the correct endpoint:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+| Document | Endpoint | UI |
+|----------|----------|----|
+| Marksheet | `POST /api/files/:id/marksheet-details` | SGPA/CGPA stats, subjects table with color-coded grades |
+| Statement of Purpose | `POST /api/files/:id/sop-summary` | Word count, clarity score, topics, strengths |
+| PAN Card | `POST /api/files/:id/pancard-summary` | PAN number, DOB, father's name, issuing authority |
+
+### SOP Analysis Screen
+Deep AI analysis via `POST /api/files/:id/sop-analysis`:
+- Impact score out of 100 with color-coded progress bar
+- Strengths, Weaknesses, Missing Elements breakdown
+- Comparison against an ideal SOP (Structure, Tone, Clarity)
+- 3 collapsible suggested rewrite formats with structure steps and sample outlines
+- Overall improvement suggestions
+
+### Profile & Settings
+- Profile circle in top-right header on all tabs
+- Dropdown showing user name, email, and logout
+
+---
+
+## API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/login` | Login |
+| POST | `/api/auth/register` | Register |
+| GET | `/api/files` | List all uploaded files |
+| POST | `/api/files/upload` | Upload a file (multipart) |
+| GET | `/api/application/dashboard` | Home dashboard data |
+| GET | `/api/application/progress` | Progress percentage |
+| POST | `/api/application/submit` | Submit application |
+| POST | `/api/files/:id/marksheet-details` | Marksheet AI analysis |
+| POST | `/api/files/:id/sop-summary` | SOP summary |
+| POST | `/api/files/:id/pancard-summary` | PAN card summary |
+| POST | `/api/files/:id/sop-analysis` | Deep SOP analysis |
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Node.js 18+
+- Expo CLI
+- iOS Simulator / Android Emulator / Expo Go
+
+### Installation
+
+```bash
+npm install
+```
+
+### Running the app
+
+```bash
+# Start Expo dev server
+npx expo start
+
+# iOS
+npx expo start --ios
+
+# Android
+npx expo start --android
+```
+
+### Environment
+The app points to `http://localhost:3000` by default. Update the base URL in `utils/api.ts` and the fetch calls in screen files if your backend runs on a different host/port.
+
+> On a physical device, replace `localhost` with your machine's local IP address (e.g. `192.168.x.x`).
+
+---
+
+## Supported File Formats
+
+| Format | MIME Type | Supported Endpoints |
+|--------|-----------|-------------------|
+| PDF | `application/pdf` | marksheet-details, sop-summary |
+| JPEG / JPG | `image/jpeg` | pancard-summary |
+| DOC | `application/msword` | sop-summary |
+| DOCX | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` | sop-summary |

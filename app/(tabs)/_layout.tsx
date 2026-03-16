@@ -5,7 +5,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
 import {
-  View, Text, TouchableOpacity, Modal, StyleSheet, Pressable, StatusBar, Platform,
+  View, Text, TouchableOpacity, Modal, StyleSheet, StatusBar, Platform,
 } from 'react-native';
 
 function ProfileButton() {
@@ -22,7 +22,7 @@ function ProfileButton() {
       </TouchableOpacity>
 
       <Modal transparent animationType="fade" visible={visible} onRequestClose={() => setVisible(false)}>
-        <Pressable style={styles.overlay} onPress={() => setVisible(false)}>
+        <TouchableOpacity style={styles.overlay} onPress={() => setVisible(false)}>
           <View style={[styles.dropdown, { backgroundColor: colorScheme === 'dark' ? '#1E2123' : '#fff' }]}>
             <View style={styles.userInfo}>
               <View style={[styles.avatarLarge, { backgroundColor: theme.tint }]}>
@@ -37,7 +37,7 @@ function ProfileButton() {
               <Text style={styles.logoutText}>Log Out</Text>
             </TouchableOpacity>
           </View>
-        </Pressable>
+        </TouchableOpacity>
       </Modal>
     </>
   );
