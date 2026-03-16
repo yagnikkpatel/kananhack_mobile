@@ -1,5 +1,7 @@
 # KananHack Mobile
 
+Video Link: https://youtube.com/shorts/4BAm3c6sxN0
+
 An AI-powered document verification mobile app built with React Native (Expo). Students can upload, verify, and manage their academic and identity documents. The backend uses Google Gemini AI to extract and analyze document data.
 
 ---
